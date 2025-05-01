@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dino Runner Pro - Animated Dinosaur Game with Vehicles</title>
+    <style>
+        :root {
+            --primary-color: #FF5722;
+            --secondary-color: #4CAF50;
+            --accent-color: #FFC107;
+            --dark-color: #333;
+            --light-color: #f8f8f8;
+            --road-color: #555;
+            --sky-color: #87CEEB;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background: linear-gradient(to bottom, var(--sky-color), #f8f8f8);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-description {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 4px solid var(--dark-color);
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 300px;
+            display: block;
+            background-color: var(--sky-color);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        button:hover {
+            background-color: #E64A19;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background-color: #9E9E9E;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #jumpBtn {
+            background-color: var(--secondary-color);
+        }
+        
+        #jumpBtn:hover:not(:disabled) {
+            background-color: #388E3C;
+        }
+        
+        #stopBtn {
+            background-color: #F44336;
+        }
+        
+        #stopBtn:hover:not(:disabled) {
+            background-color: #D32F2F;
+        }
+        
+        .score-container {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: 'Press Start 2P', cursive;
+            color: var(--dark-color);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .high-score {
+            margin-left: 20px;
+            color: var(--primary-color);
+        }
+        
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .instructions ul {
+            list-style-position: inside;
+            padding-left: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            #gameCanvas {
+                height: 250px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .score-container {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            #gameCanvas {
+                height: 200px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 80%;
+                max-width: 250px;
+            }
+            
+            .score-container {
+                font-size: 1rem;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DINO RUNNER PRO</h1>
+            <p class="game-description">Jump over vehicles and survive as long as you can in this enhanced dinosaur runner game!</p>
+        </header>
+        
+        <div class="game-container">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        
+        <div class="score-container">
+            Score: <span id="score">0</span>
+            <span class="high-score">High: <span id="highScore">0</span></span>
+        </div>
+        
+        <div class="controls">
+            <button id="playBtn">▶️ Play</button>
+            <button id="jumpBtn" disabled>🦖 Jump (Space)</button>
+            <button id="stopBtn" disabled>⏹️ Stop</button>
+            <button id="resetBtn">🔄 Reset</button>
+        </div>
+        
+        <div class="instructions">
+            <h2>How to Play</h2>
+            <ul>
+                <li>Press <strong>PLAY</strong> to start the game</li>
+                <li>Press <strong>SPACE</strong> or the <strong>JUMP</strong> button to make the dinosaur jump</li>
+                <li>Avoid hitting the cars and bikes</li>
+                <li>The game gets faster as you score more points</li>
+                <li>Try to beat your high score!</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game variables
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreElement = document.getElementById('score');
+            const highScoreElement = document.getElementById('highScore');
+            const playBtn = document.getElementById('playBtn');
+            const jumpBtn = document.getElementById('jumpBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            // Set canvas dimensions
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = 300; // Fixed height for game area
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Load high score from localStorage
+            let highScore = localStorage.getItem('dinoHighScore') || 0;
+            highScoreElement.textContent = highScore;
+            
+            // Game state
+            let gameRunning = false;
+            let score = 0;
+            let gameSpeed = 5;
+            let gravity = 0.6;
+            
+            // Dino properties
+            let dino = {
+                x: 50,
+                y: canvas.height - 100,
+                width: 60,
+                height: 70,
+                velocityY: 0,
+                jumping: false,
+                gravity: 0.6,
+                jumpForce: -15,
+                frame: 0,
+                frameCount: 0
+            };
+            
+            // Vehicle obstacles
+            let vehicles = [];
+            let clouds = [];
+            let lastVehicleTime = 0;
+            let lastCloudTime = 0;
+            let animationId;
+            let scoreInterval;
+            
+            // Vehicle types
+            const vehicleTypes = [
+                { width: 80, height: 40, color: '#E91E63', type: 'car' }, // Pink car
+                { width: 60, height: 30, color: '#3F51B5', type: 'car' }, // Blue car
+                { width: 50, height: 35, color: '#FF9800', type: 'bike' }, // Orange bike
+                { width: 45, height: 30, color: '#009688', type: 'bike' }  // Teal bike
+            ];
+            
+            // Game functions
+            function drawDino() {
+                ctx.save();
+                ctx.translate(dino.x, dino.y);
+                
+                // Animate the dino (running or jumping)
+                if (dino.jumping) {
+                    // Draw jumping dino
+                    drawDinoJumping();
+                } else {
+                    // Draw running dino with animation
+                    drawDinoRunning();
+                }
+                
+                ctx.restore();
+            }
+            
+            function drawDinoRunning() {
+                // Body
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.ellipse(30, 35, 25, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Head
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.ellipse(50, 20, 15, 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eye
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(55, 18, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Mouth - animate between open and closed
+                if (Math.floor(dino.frame / 10) % 2 === 0) {
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(58, 20, 5, 0, Math.PI);
+                    ctx.stroke();
+                } else {
+                    ctx.fillStyle = 'black';
+                    ctx.beginPath();
+                    ctx.arc(58, 22, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Legs - animate running
+                ctx.fillStyle = '#388E3C';
+                const legPos = Math.sin(dino.frame * 0.2) * 5;
+                
+                // Front leg
+                ctx.fillRect(20, 50, 10, -20 - legPos);
+                // Back leg
+                ctx.fillRect(35, 50, 10, -20 + legPos);
+                
+                // Arm
+                ctx.fillRect(40, 30, 5, 15);
+                
+                // Tail
+                ctx.beginPath();
+                ctx.moveTo(10, 35);
+                ctx.quadraticCurveTo(-10, 30, -15, 40);
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = '#388E3C';
+                ctx.stroke();
+            }
+            
+            function drawDinoJumping() {
+                // Body
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.ellipse(30, 35, 25, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Head
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.ellipse(50, 20, 15, 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eye
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(55, 18, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Mouth - open when jumping
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(58, 20, 5, 0, Math.PI);
+                ctx.stroke();
+                
+                // Legs - together when jumping
+                ctx.fillStyle = '#388E3C';
+                ctx.fillRect(25, 50, 10, -25);
+                ctx.fillRect(35, 50, 10, -25);
+                
+                // Arms
+                ctx.fillRect(40, 30, 5, 15);
+                ctx.fillRect(45, 30, 5, 15);
+                
+                // Tail
+                ctx.beginPath();
+                ctx.moveTo(10, 35);
+                ctx.quadraticCurveTo(-10, 25, -15, 35);
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = '#388E3C';
+                ctx.stroke();
+            }
+            
+            function drawVehicle(vehicle) {
+                ctx.save();
+                ctx.translate(vehicle.x, vehicle.y);
+                
+                ctx.fillStyle = vehicle.color;
+                
+                if (vehicle.type === 'car') {
+                    // Draw car body
+                    ctx.fillRect(0, 0, vehicle.width, vehicle.height);
+                    
+                    // Draw windows
+                    ctx.fillStyle = 'rgba(200, 230, 255, 0.5)';
+                    ctx.fillRect(10, 5, vehicle.width - 20, vehicle.height / 2);
+                    
+                    // Draw wheels
+                    ctx.fillStyle = '#333';
+                    ctx.beginPath();
+                    ctx.arc(15, vehicle.height, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(vehicle.width - 15, vehicle.height, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Draw bike
+                    // Main frame
+                    ctx.fillRect(10, 10, vehicle.width - 20, 5);
+                    ctx.fillRect(vehicle.width / 2 - 5, 10, 10, vehicle.height - 10);
+                    
+                    // Wheels
+                    ctx.beginPath();
+                    ctx.arc(15, vehicle.height, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(vehicle.width - 15, vehicle.height, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Handlebar
+                    ctx.fillRect(vehicle.width - 10, 5, 5, 10);
+                }
+                
+                ctx.restore();
+            }
+            
+            function drawCloud(cloud) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.beginPath();
+                ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
+                ctx.arc(cloud.x + cloud.radius * 0.8, cloud.y - cloud.radius * 0.2, cloud.radius * 0.8, 0, Math.PI * 2);
+                ctx.arc(cloud.x + cloud.radius * 1.6, cloud.y, cloud.radius * 0.9, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            function drawRoad() {
+                // Road
+                ctx.fillStyle = '#555';
+                ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+                
+                // Road markings
+                ctx.fillStyle = '#FFEB3B';
+                for (let i = 0; i < canvas.width; i += 60) {
+                    ctx.fillRect(i, canvas.height - 25, 30, 5);
+                }
+                
+                // Sidewalk
+                ctx.fillStyle = '#795548';
+                ctx.fillRect(0, canvas.height - 45, canvas.width, 5);
+            }
+            
+            function updateDino() {
+                // Animation frame counter
+                dino.frameCount++;
+                if (dino.frameCount >= 5) {
+                    dino.frame++;
+                    dino.frameCount = 0;
+                }
+                
+                // Apply gravity
+                dino.velocityY += dino.gravity;
+                dino.y += dino.velocityY;
+                
+                // Ground collision
+                if (dino.y > canvas.height - 100) {
+                    dino.y = canvas.height - 100;
+                    dino.velocityY = 0;
+                    dino.jumping = false;
+                }
+            }
+            
+            function updateVehicles() {
+                // Add new vehicles
+                const now = Date.now();
+                if (now - lastVehicleTime > 1500 && Math.random() < 0.03) {
+                    const vehicleType = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+                    vehicles.push({
+                        x: canvas.width,
+                        y: canvas.height - 40 - vehicleType.height,
+                        width: vehicleType.width,
+                        height: vehicleType.height,
+                        color: vehicleType.color,
+                        type: vehicleType.type,
+                        passed: false
+                    });
+                    lastVehicleTime = now;
+                }
+                
+                // Move and remove vehicles
+                for (let i = vehicles.length - 1; i >= 0; i--) {
+                    vehicles[i].x -= gameSpeed;
+                    
+                    // Check if vehicle passed the dino
+                    if (!vehicles[i].passed && vehicles[i].x + vehicles[i].width < dino.x) {
+                        vehicles[i].passed = true;
+                        score += 5; // Bonus points for passing vehicles
+                        scoreElement.textContent = score;
+                        
+                        // Increase speed every 100 points
+                        if (score % 100 === 0) {
+                            gameSpeed += 0.5;
+                        }
+                    }
+                    
+                    // Remove vehicles that are off screen
+                    if (vehicles[i].x + vehicles[i].width < 0) {
+                        vehicles.splice(i, 1);
+                    }
+                }
+            }
+            
+            function updateClouds() {
+                // Add new clouds
+                const now = Date.now();
+                if (now - lastCloudTime > 4000 && Math.random() < 0.01) {
+                    clouds.push({
+                        x: canvas.width + 50,
+                        y: 30 + Math.random() * 100,
+                        radius: 20 + Math.random() * 15,
+                        speed: 1 + Math.random() * 2
+                    });
+                    lastCloudTime = now;
+                }
+                
+                // Move and remove clouds
+                for (let i = clouds.length - 1; i >= 0; i--) {
+                    clouds[i].x -= clouds[i].speed;
+                    
+                    // Remove clouds that are off screen
+                    if (clouds[i].x + clouds[i].radius * 2 < 0) {
+                        clouds.splice(i, 1);
+                    }
+                }
+            }
+            
+            function checkCollisions() {
+                for (const vehicle of vehicles) {
+                    if (
+                        dino.x < vehicle.x + vehicle.width &&
+                        dino.x + dino.width > vehicle.x &&
+                        dino.y < vehicle.y + vehicle.height &&
+                        dino.y + dino.height > vehicle.y
+                    ) {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+            
+            function gameOver() {
+                cancelAnimationFrame(animationId);
+                clearInterval(scoreInterval);
+                gameRunning = false;
+                playBtn.disabled = false;
+                jumpBtn.disabled = true;
+                stopBtn.disabled = true;
+                
+                // Update high score
+                if (score > highScore) {
+                    highScore = score;
+                    highScoreElement.textContent = highScore;
+                    localStorage.setItem('dinoHighScore', highScore);
+                }
+                
+                // Game over text
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '30px "Press Start 2P", cursive';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 30);
+                
+                ctx.font = '18px "Press Start 2P", cursive';
+                ctx.fillText(`SCORE: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+                ctx.fillText(`HIGH SCORE: ${highScore}`, canvas.width / 2, canvas.height / 2 + 40);
+                
+                ctx.font = '14px "Press Start 2P", cursive';
+                ctx.fillText('Press RESET to play again', canvas.width / 2, canvas.height / 2 + 80);
+                
+                ctx.textAlign = 'left';
+            }
+            
+            function resetGame() {
+                // Clear game state
+                vehicles = [];
+                clouds = [];
+                score = 0;
+                gameSpeed = 5;
+                dino.y = canvas.height - 100;
+                dino.velocityY = 0;
+                dino.jumping = false;
+                dino.frame = 0;
+                dino.frameCount = 0;
+                
+                // Update UI
+                scoreElement.textContent = score;
+                playBtn.disabled = false;
+                jumpBtn.disabled = true;
+                stopBtn.disabled = true;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawRoad();
+                drawDino();
+            }
+            
+            function startGame() {
+                if (gameRunning) return;
+                
+                gameRunning = true;
+                playBtn.disabled = true;
+                jumpBtn.disabled = false;
+                stopBtn.disabled = false;
+                
+                // Start score increment
+                scoreInterval = setInterval(() => {
+                    score += 1;
+                    scoreElement.textContent = score;
+                }, 100);
+                
+                // Start game loop
+                gameLoop();
+            }
+            
+            function stopGame() {
+                gameRunning = false;
+                cancelAnimationFrame(animationId);
+                clearInterval(scoreInterval);
+                playBtn.disabled = false;
+                jumpBtn.disabled = true;
+                stopBtn.disabled = true;
+            }
+            
+            function jump() {
+                if (!dino.jumping && gameRunning) {
+                    dino.velocityY = dino.jumpForce;
+                    dino.jumping = true;
+                }
+            }
+            
+            // Game loop
+            function gameLoop() {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw background
+                drawRoad();
+                
+                // Update game state
+                updateDino();
+                updateVehicles();
+                updateClouds();
+                checkCollisions();
+                
+                // Draw game elements
+                clouds.forEach(drawCloud);
+                vehicles.forEach(drawVehicle);
+                drawDino();
+                
+                // Continue animation
+                if (gameRunning) {
+                    animationId = requestAnimationFrame(gameLoop);
+                }
+            }
+            
+            // Event listeners
+            playBtn.addEventListener('click', startGame);
+            stopBtn.addEventListener('click', stopGame);
+            resetBtn.addEventListener('click', resetGame);
+            jumpBtn.addEventListener('click', jump);
+            
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
+                if ((e.code === 'Space' || e.key === ' ' || e.keyCode === 32) && gameRunning) {
+                    e.preventDefault();
+                    jump();
+                }
+            });
+            
+            // Touch controls for mobile
+            canvas.addEventListener('touchstart', (e) => {
+                if (gameRunning) {
+                    e.preventDefault();
+                    jump();
+                }
+            });
+            
+            // Initialize game
+            resetGame();
+        });
+    </script>
+</body>
+</html>
